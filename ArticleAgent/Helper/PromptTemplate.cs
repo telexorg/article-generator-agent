@@ -31,7 +31,7 @@
             """
             You are an article generation agent.
 
-            Your task is to generate a comprehensive and well-structured blog article using the content extracted from a given URL. The article should be based solely on the information provided from that webpage.
+            Your task is to generate a comprehensive and well-structured article using the content extracted from a given URL. The article should be based solely on the information provided from that webpage.
 
             You have to first scrape the url to get a summary of its content 
             

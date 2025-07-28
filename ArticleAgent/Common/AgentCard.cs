@@ -25,7 +25,7 @@ namespace ArticleAgent.Common
             {
                 Name = "Article Agent",
                 Description = "Article Agent uses AI to extract, summarize, and generate structured articles from one or more URLs with minimal input.",
-                Url = "https://telex-article-agent.onrender.com/",
+                Url = "https://article-generator-agent.onrender.com/api",
                 Version = "1.0.0",
                 IconUrl = "https://res.cloudinary.com/dlu45noef/image/upload/v1742882213/article-agent-icon.jpg",
                 DocumentationUrl = "https://telex-article-agent-docs.onrender.com",
