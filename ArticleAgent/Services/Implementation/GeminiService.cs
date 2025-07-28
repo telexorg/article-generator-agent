@@ -3,6 +3,7 @@ using ArticleAgent.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.Google;
 using System;
 using System.Text.Json;
 
@@ -44,8 +45,20 @@ namespace ArticleAgent.Services.Implementation
                 {
                     history.AddUserMessage(userMessage);
                 }
-                var result = await chatService.GetChatMessageContentAsync(history);
+                var executionSettings = new GeminiPromptExecutionSettings
+                {
+                    ToolCallBehavior = GeminiToolCallBehavior.AutoInvokeKernelFunctions,
 
+                    Temperature = 0.7,               // Controls randomness; lower is more deterministic
+                    TopP = 0.9,                      // Nucleus sampling; focuses on top cumulative probability tokens
+                    TopK = 40,                       // Limits sampling to top-k probable tokens
+                };
+
+                var result = await chatService.GetChatMessageContentAsync(
+                    history,
+                    executionSettings: executionSettings,
+                    kernel: kernel
+                );                
 
                 return result.Content ?? "";
             }

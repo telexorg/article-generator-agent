@@ -118,7 +118,7 @@ async Task<IResult> HandleA2aTaskRequest(
     _logger.LogInformation($"Task {request.Id} submitted");
     var response = DataBuilder.ConstructTaskReceivedResponse(request);
 
-    return Results.Ok(response);
+    return Results.Json(response);
 }
 
 
