@@ -118,6 +118,8 @@ async Task<IResult> HandleA2aTaskRequest(
     _logger.LogInformation($"Task {request.Id} submitted");
     var response = DataBuilder.ConstructTaskReceivedResponse(request);
 
+    _logger.LogInformation($"Task received response: {JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true})}");
+
     return Results.Json(response);
 }
 

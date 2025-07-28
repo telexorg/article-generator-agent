@@ -44,11 +44,12 @@ namespace ArticleAgent.Services.Implementation
 
                 var isSent = await SendResponseAsync(taskResponse, taskContext);
 
-                if (isSent)
+                if (!isSent)
                 {
                     _logger.LogInformation("Response sent successfully");
                 }
-                _logger.LogInformation("Failed to send response");
+                else 
+                    _logger.LogInformation("Failed to send response");
 
             }
             catch (Exception ex)
