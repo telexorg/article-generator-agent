@@ -19,6 +19,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+});
 
 builder.Services.Configure<TelexApiSettings>(builder.Configuration.GetSection("TelexApiSettings"));
 
@@ -127,7 +131,7 @@ app.MapGet("/api/.well-known/agent.json", async () =>
         return Results.BadRequest("Couldn't retrieve agent card");
 
     }
-    return Results.Ok(response);
+    return Results.Json(response);
 });
 
 app.Run();

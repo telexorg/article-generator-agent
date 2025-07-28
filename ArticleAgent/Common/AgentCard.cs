@@ -19,7 +19,7 @@ namespace ArticleAgent.Common
         public Dictionary<string, ISecurityScheme> SecuritySchemes { get; set; }
         public bool SuppostsAuthenticatedExtendedCard { get; set; }
 
-        public static string Get()
+        public static AgentCard Get()
         {
             var agentA2A = new AgentCard
             {
@@ -66,12 +66,9 @@ namespace ArticleAgent.Common
                 }
             };
 
-            var options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
 
-            return JsonSerializer.Serialize(agentA2A, options);
+
+            return agentA2A;
         }
 
 
