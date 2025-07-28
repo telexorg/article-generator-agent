@@ -28,17 +28,27 @@ namespace ArticleAgent.Services.Implementation
             try
             {
 
-                if (taskContext.TaskId == null)
+                if (taskContext != null && taskContext.TaskId == null)
                 {
                     taskContext.TaskId = Guid.NewGuid().ToString();
                     _contextAccessor.SetTaskContext(taskContext);
                 }
 
-                _logger.LogInformation("HandleUserInput: processing user message - {Message}", taskContext.Message);
-                var aiReply = await _geminiService.GenerateAsync(string.Empty, taskContext, userMessage: taskContext.Message);
+                _logger.LogInformation("HandleUserInput: processing user message - {Message}", taskContext?.Message);
+
+                var systemPrompt = PromptTemplate.GenerateSystemPrompt();
+                var aiReply = await _geminiService.GenerateAsync(systemPrompt, taskContext, userMessage: taskContext.Message);
 
 
                 var taskResponse = DataBuilder.ConstructPushNotificationTask(request, aiReply, taskContext.TaskId);
+
+                var isSent = await SendResponseAsync(taskResponse, taskContext);
+
+                if (isSent)
+                {
+                    _logger.LogInformation("Response sent successfully");
+                }
+                _logger.LogInformation("Failed to send response");
 
             }
             catch (Exception ex)

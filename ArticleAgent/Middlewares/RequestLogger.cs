@@ -36,7 +36,7 @@ namespace ArticleAgent.Middlewares
                     {
                         formattedBody = PrettifyJson(body);
 
-                        if (request.Path == "/api/v1/blogger-agent" && request.Method == "POST")
+                        if (request.Path == "/api" && request.Method == "POST")
                         {
                             var requestBody = JsonSerializer.Deserialize<A2aTaskRequest>(body, new JsonSerializerOptions
                             {

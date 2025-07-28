@@ -18,13 +18,14 @@ namespace ArticleAgent.Plugins
             _scopeFactory = scopeFactory;
         }
 
-        [KernelFunction("GenerateArticlefromUrl")]
-        [Description("Generate a comprehensive article from url.")]
+        [KernelFunction("ScrapeWebUrlContent")]
+        [Description("Scrapes the url and return a summary of its content.")]
         public async Task<string> GenerateBlogPostAsync(
-           [Description("The URLs to scrape")] string url)
+           [Description("The url to scrape")] string url)
         {
             using var scope = _scopeFactory.CreateScope();
             var writerAgent = scope.ServiceProvider.GetRequiredService<ArticleService>();
+            var service = scope.ServiceProvider.GetRequiredService<SummarizerService>();
 
             try
             {
@@ -32,14 +33,15 @@ namespace ArticleAgent.Plugins
                 if (string.IsNullOrWhiteSpace(rawContent))
                     return "No content found.";
 
-                var summaryContent = await SummarizerService.SummarizeContentAsync(rawContent);
+                var summaryContent = await service.SummarizeContentAsync(rawContent);
                 if (summaryContent == null)
                 {
                     return "Couldn't summarize content";
                 }
 
-                var polishedSummary = await GeminiService.GenerateContentAsync(PromptTemplate.GenerateArticlePrompt(summaryContent));
-                return polishedSummary;
+                return summaryContent;
+                //var polishedSummary = await _geminiService.GenerateContentAsync(PromptTemplate.GenerateArticlePrompt(summaryContent));
+                //return polishedSummary;
             }
             catch (Exception ex)
             {

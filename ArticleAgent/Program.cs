@@ -22,13 +22,13 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<TelexApiSettings>(builder.Configuration.GetSection("TelexApiSettings"));
 
+builder.Services.AddSingleton<KernelProvider>();
+builder.Services.AddSingleton<ArticlePlugin>();
 builder.Services.AddScoped<ArticleService>();
 //builder.Services.AddScoped<WebScraper>();
 builder.Services.AddScoped<GeminiService>();
-builder.Services.AddScoped<ArticleService>();
+builder.Services.AddScoped<SummarizerService>();
 builder.Services.AddScoped<TaskContextAccessor>();
-builder.Services.AddSingleton<KernelProvider>();
-builder.Services.AddSingleton<ArticlePlugin>();
 builder.Services.AddScoped<DataContext>();
 builder.Services.AddScoped<HttpHelper>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -101,7 +101,7 @@ async Task<IResult> HandleA2aTaskRequest(
 
     ValidationHelper.ValidateRequest(request);
 
-    var contextSnapshot = TaskContextAccessor.Current;
+    var contextSnapshot = _taskContextAccessor.GetTaskContext();
 
 
     Task.Run(() =>

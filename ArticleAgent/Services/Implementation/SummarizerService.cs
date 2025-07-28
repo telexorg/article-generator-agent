@@ -5,21 +5,21 @@ namespace ArticleAgent.Services.Implementation
     public class SummarizerService
     {
         //private readonly WebScraper _webScraper;
-        //private readonly GeminiService _geminiService;
+        private readonly GeminiService _geminiService;
         private const int MaxTokens = 1000; // Gemini limit per summary chunk
         private const int TokensPerWord = 4; // Rough estimate (1 token ≈ 0.75 words)
 
 
-        //public ContentSummarizerService(WebScraper webScraper, GeminiService geminiService) 
-        //{
-        //    _webScraper = webScraper;
-        //    _geminiService = geminiService;
-        //}
+        public SummarizerService(GeminiService geminiService)
+        {
+            //_webScraper = webScraper;
+            _geminiService = geminiService;
+        }
 
 
 
 
-        public static async Task<string> SummarizeContentAsync(string rawContent)
+        public async Task<string> SummarizeContentAsync(string rawContent)
         {
             
             var maxWords = MaxTokens * TokensPerWord; // e.g., 1000 * 4 = 4000
@@ -34,7 +34,7 @@ namespace ArticleAgent.Services.Implementation
                 if (chunkWords.Length == 0) continue;
 
                 var chunkText = string.Join(" ", chunkWords);
-                var summary = await GeminiService.GenerateContentAsync(PromptTemplate.SummarizeContentPrompt(chunkText));
+                var summary = await _geminiService.GenerateContentAsync(PromptTemplate.SummarizeContentPrompt(chunkText));
                 chunkSummaries.Add(summary);
 
                 // Early break if we only need one chunk
@@ -47,7 +47,7 @@ namespace ArticleAgent.Services.Implementation
 
             // 3. Combine and polish if multiple
             var combined = string.Join("\n\n", chunkSummaries);
-            var polishedSummary = await GeminiService.GenerateContentAsync(combined);
+            var polishedSummary = await _geminiService.GenerateContentAsync(combined);
 
             return polishedSummary;
         }

@@ -57,7 +57,7 @@ namespace ArticleAgent.Services.Implementation
         }
 
 
-        public static async Task<string> GenerateContentAsync(string contentToSummarize)
+        public async Task<string> GenerateContentAsync(string contentToSummarize)
         {
             var count = contentToSummarize.Length;
 
@@ -77,7 +77,7 @@ namespace ArticleAgent.Services.Implementation
             };
 
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("x-goog-api-key", "AIzaSyBi4lASZKojpbTy_QcgL0qAc4wpu6l579c");
+            client.DefaultRequestHeaders.Add("x-goog-api-key", _apiKey);
 
             var response = await client.PostAsJsonAsync(
                 "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
