@@ -3,6 +3,7 @@ using ArticleAgent.Services.Implementation;
 using Microsoft.SemanticKernel;
 using System;
 using System.ComponentModel;
+using System.Text;
 
 namespace ArticleAgent.Plugins
 {
@@ -21,25 +22,33 @@ namespace ArticleAgent.Plugins
         [KernelFunction("ScrapeWebUrlContent")]
         [Description("Scrapes the url and return a summary of its content.")]
         public async Task<string> GenerateBlogPostAsync(
-           [Description("The url to scrape")] string url)
+           [Description("The urls to scrape")] List<string> urls)
         {
             using var scope = _scopeFactory.CreateScope();
             var writerAgent = scope.ServiceProvider.GetRequiredService<ArticleService>();
             var service = scope.ServiceProvider.GetRequiredService<SummarizerService>();
-
+            
             try
             {
-                var rawContent = await WebScraper.ScrapeContentAsync(url);
-                if (string.IsNullOrWhiteSpace(rawContent))
-                    return "No content found.";
+                StringBuilder summaries = new StringBuilder();
 
-                var summaryContent = await service.SummarizeContentAsync(rawContent);
-                if (summaryContent == null)
+                foreach (string url in urls)
+                {
+                    var rawContent = await WebScraper.ScrapeContentAsync(url);
+                    if (string.IsNullOrWhiteSpace(rawContent))
+                        return "No content found.";
+
+                    var summaryContent = await service.SummarizeContentAsync(rawContent);
+
+                    summaries.Append(summaryContent);
+                }
+
+                if (summaries == null)
                 {
                     return "Couldn't summarize content";
                 }
 
-                return summaryContent;
+                return summaries.ToString();
                 //var polishedSummary = await _geminiService.GenerateContentAsync(PromptTemplate.GenerateArticlePrompt(summaryContent));
                 //return polishedSummary;
             }

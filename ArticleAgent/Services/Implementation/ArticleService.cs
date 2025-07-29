@@ -46,10 +46,10 @@ namespace ArticleAgent.Services.Implementation
 
                 if (!isSent)
                 {
-                    _logger.LogInformation("Response sent successfully");
+                    _logger.LogInformation("Failed to send response");
                 }
                 else 
-                    _logger.LogInformation("Failed to send response");
+                    _logger.LogInformation("Response sent successfully");
 
             }
             catch (Exception ex)

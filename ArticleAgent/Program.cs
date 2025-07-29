@@ -13,6 +13,8 @@ using Microsoft.Extensions.Caching.Memory;
 using ArticleAgent.Plugins;
 using Microsoft.SemanticKernel;
 using ArticleAgent.Data;
+using System.Text.Json.Serialization;
+using ArticleAgent.Routes;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.Configure<JsonOptions>(options =>
 {
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
 
 builder.Services.Configure<TelexApiSettings>(builder.Configuration.GetSection("TelexApiSettings"));
@@ -72,8 +75,8 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); // Link to the JSON spec
-        c.RoutePrefix = ""; // Swagger UI served at /docs
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); 
+        c.RoutePrefix = ""; 
     });
     app.MapOpenApi();
 }
@@ -88,40 +91,10 @@ app.MapDefaultEndpoints();
 
 app.UseHttpsRedirection();
 
-app.MapPost("/api", HandleA2aTaskRequest)
+app.MapPost("/api", A2aMessageRoute.HandleA2aTaskRequest)
    .WithName("GenerateArticle") // Optional: Swagger operationId
    .WithOpenApi();
 
-async Task<IResult> HandleA2aTaskRequest(
-    [FromBody] A2aTaskRequest request,
-    [FromServices] ArticleService articleService,
-    [FromServices] TaskContextAccessor _taskContextAccessor,
-    [FromServices] ILogger<Program> _logger)
-{
-    if (request == null)
-        return Results.BadRequest("Invalid request");
-
-    _logger.LogInformation($"Task processing started for task {request.Id}");
-
-    ValidationHelper.ValidateRequest(request);
-
-    var contextSnapshot = _taskContextAccessor.GetTaskContext();
-
-
-    Task.Run(() =>
-    {
-        _logger.LogInformation($"Processing task {request.Id} in background");
-        _taskContextAccessor.SetTaskContext(contextSnapshot);
-        articleService.HandleUserMessageAsync(request);
-    });
-
-    _logger.LogInformation($"Task {request.Id} submitted");
-    var response = DataBuilder.ConstructTaskReceivedResponse(request);
-
-    _logger.LogInformation($"Task received response: {JsonSerializer.Serialize(response, new JsonSerializerOptions { WriteIndented = true})}");
-
-    return Results.Json(response);
-}
 
 
 app.MapGet("/api/.well-known/agent.json", async () =>
