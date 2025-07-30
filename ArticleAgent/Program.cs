@@ -96,6 +96,11 @@ app.MapPost("/api", A2aMessageRoute.HandleA2aTaskRequest)
    .WithOpenApi();
 
 
+app.MapMethods("/health", new[] { "HEAD" }, () =>
+{
+    return Results.Ok("Service is alive");
+});
+
 
 app.MapGet("/api/.well-known/agent.json", async () =>
 {
