@@ -19,45 +19,85 @@ namespace ArticleAgent.Plugins
             _scopeFactory = scopeFactory;
         }
 
+        //[KernelFunction("ScrapeWebUrlContent")]
+        //[Description("Scrapes the url and return a summary of its content.")]
+        //public async Task<string> GenerateBlogPostAsync(1
+        //   [Description("The urls to scrape")] List<string> urls)
+        //{
+        //    using var scope = _scopeFactory.CreateScope();
+        //    var writerAgent = scope.ServiceProvider.GetRequiredService<ArticleService>();
+        //    var service = scope.ServiceProvider.GetRequiredService<SummarizerService>();
+
+        //    try
+        //    {
+        //        StringBuilder summaries = new StringBuilder();
+
+        //        foreach (string url in urls)
+        //        {
+        //            var rawContent = await WebScraper.ScrapeContentAsync(url);
+        //            if (string.IsNullOrWhiteSpace(rawContent))
+        //                return "No content found.";
+
+        //            var summaryContent = await service.SummarizeContentAsync(rawContent);
+
+        //            summaries.Append(summaryContent);
+        //        }
+
+        //        if (summaries == null)
+        //        {
+        //            return "Couldn't summarize content";
+        //        }
+
+        //        return summaries.ToString();
+        //        //var polishedSummary = await _geminiService.GenerateContentAsync(PromptTemplate.GenerateArticlePrompt(summaryContent));
+        //        //return polishedSummary;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"{ex}, Failed to Write blog post.");
+        //        return "⚠️ Blog generation failed. Please try again.";
+        //    }
+
+        //}
+
         [KernelFunction("ScrapeWebUrlContent")]
-        [Description("Scrapes the url and return a summary of its content.")]
-        public async Task<string> GenerateBlogPostAsync(
-           [Description("The urls to scrape")] List<string> urls)
+        public async Task<string> GenerateBlogPostAsync([Description("The URLs to scrape")] List<string> urls)
         {
             using var scope = _scopeFactory.CreateScope();
             var writerAgent = scope.ServiceProvider.GetRequiredService<ArticleService>();
             var service = scope.ServiceProvider.GetRequiredService<SummarizerService>();
-            
+
             try
             {
-                StringBuilder summaries = new StringBuilder();
+                var allSummaries = new List<string>();
 
                 foreach (string url in urls)
                 {
                     var rawContent = await WebScraper.ScrapeContentAsync(url);
                     if (string.IsNullOrWhiteSpace(rawContent))
-                        return "No content found.";
+                        continue; // Skip empty URLs instead of failing the whole process
 
                     var summaryContent = await service.SummarizeContentAsync(rawContent);
 
-                    summaries.Append(summaryContent);
+                    // Optionally: Add source reference in markdown
+                    var sourceReference = $"**Source:** [{url}]({url})\n\n";
+                    allSummaries.Add(sourceReference + summaryContent);
                 }
 
-                if (summaries == null)
-                {
-                    return "Couldn't summarize content";
-                }
+                if (allSummaries.Count == 0)
+                    return "❌ No valid content found from the provided URLs.";
 
-                return summaries.ToString();
-                //var polishedSummary = await _geminiService.GenerateContentAsync(PromptTemplate.GenerateArticlePrompt(summaryContent));
-                //return polishedSummary;
+                // Combine all summaries
+                var combinedSummary = string.Join("\n\n---\n\n", allSummaries);
+
+                return combinedSummary;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{ex}, Failed to Write blog post.");
+                Console.WriteLine($"{ex}, Failed to write blog post.");
                 return "⚠️ Blog generation failed. Please try again.";
             }
-
         }
+
     }
 }
